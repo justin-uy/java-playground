@@ -4,6 +4,7 @@ import com.justinuy.playground.util.AbstractTask;
 import java.util.Arrays;
 import java.io.StringWriter;
 import java.io.PrintWriter;
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * @author Justin Uy
@@ -18,6 +19,7 @@ public final class Test extends AbstractTask {
   private static int assertionCounter = 0;
   private boolean silent;
   private boolean runSuccess;
+  private static final ReentrantLock lock = new ReentrantLock();
 
   public Test(String name, Runnable[] testCases) {
     super(name, Test.testCounter + 1);
@@ -76,7 +78,33 @@ public final class Test extends AbstractTask {
   }
 
   public static void assertExpectedIntArray(int[] result, int[] expected) {
-    Test.assertionCounter++;
+    incrementAssertionCounter();
+    if (!Arrays.equals(result, expected)) {
+      throw new RuntimeException(
+        String.format(
+          "expected %s to equal %s",
+          com.justinuy.playground.util.Arrays.toString(expected),
+          com.justinuy.playground.util.Arrays.toString(result)
+        )
+      );
+    }
+  }
+
+  public static void assertExpectedLongArray(long[] result, long[] expected) {
+    incrementAssertionCounter();
+    if (!Arrays.equals(result, expected)) {
+      throw new RuntimeException(
+        String.format(
+          "expected %s to equal %s",
+          com.justinuy.playground.util.Arrays.toString(expected),
+          com.justinuy.playground.util.Arrays.toString(result)
+        )
+      );
+    }
+  }
+
+  public static void assertExpectedArray(Object[] result, Object[] expected) {
+    incrementAssertionCounter();
     if (!Arrays.equals(result, expected)) {
       throw new RuntimeException(
         String.format(
@@ -89,7 +117,7 @@ public final class Test extends AbstractTask {
   }
 
   public static void assertExpectedNull(Object result) {
-    Test.assertionCounter++;
+    incrementAssertionCounter();
     if (result != null) {
       throw new RuntimeException(
         String.format("expected %s to equal null", result)
@@ -97,20 +125,33 @@ public final class Test extends AbstractTask {
     }
   }
 
-  public static void assertExpectedInts(int result, int expected) {
+  public static void assertExpectedInt(int result, int expected) {
     Test.assertExpected(new Integer(result), new Integer(expected));
   }
 
-  public static void assertExpectedBooleans(boolean result, boolean expected) {
+  public static void assertExpectedLong(long result, long expected) {
+    Test.assertExpected(new Long(result), new Long(expected));
+  }
+
+  public static void assertExpectedBoolean(boolean result, boolean expected) {
     Test.assertExpected(new Boolean(result), new Boolean(expected));
   }
 
   public static void assertExpected(Object result, Object expected) {
-    Test.assertionCounter++;
+    incrementAssertionCounter();
     if (!expected.equals(result)) {
       throw new RuntimeException(
         String.format("expected %s to equal %s", expected, result)
       );
+    }
+  }
+
+  private static void incrementAssertionCounter() {
+    lock.lock();
+    try {
+      assertionCounter++;
+    } finally {
+      lock.unlock();
     }
   }
 

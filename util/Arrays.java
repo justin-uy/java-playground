@@ -1,7 +1,5 @@
 package com.justinuy.playground.util;
 
-import java.lang.Comparable;
-import java.lang.StringBuffer;
 import java.util.List;
 import java.util.stream.IntStream;
 import java.util.stream.Collectors;
@@ -63,6 +61,50 @@ public final class Arrays {
   }
 
   /**
+   * Return a nice readable string given an long[].
+   * <p>
+   * Array toString() default implementation returns the refererence. We want to provide a
+   * convenient function that returns a readable/printable string that reflects the contents.
+   * </p>
+   * @param int[]
+   * @return String
+   */
+  public static String toString(long[] arr) {
+    StringBuffer buffer = new StringBuffer();
+    buffer.append("[ ");
+
+    for (int i = 0; i < arr.length; i++) {
+      buffer.append(arr[i]);
+      buffer.append(" ");
+    }
+
+    buffer.append("]");
+    return buffer.toString();
+  }
+
+  /**
+   * Return a nice readable string given an Object[].
+   * <p>
+   * Array toString() default implementation returns the refererence. We want to provide a
+   * convenient function that returns a readable/printable string that reflects the contents.
+   * </p>
+   * @param int[]
+   * @return String
+   */
+  public static String toString(Object[] arr) {
+    StringBuffer buffer = new StringBuffer();
+    buffer.append("[ ");
+
+    for (int i = 0; i < arr.length; i++) {
+      buffer.append(arr[i]);
+      buffer.append(" ");
+    }
+
+    buffer.append("]");
+    return buffer.toString();
+  }
+
+  /**
    * Given a sorted array and a comparable object, try to return the index of an element in the
    * array with the same value.
    *
@@ -100,4 +142,30 @@ public final class Arrays {
       return median;
     }
   }
+
+  /**
+   * Given two arrays, return an array with the values interleaved.
+   *
+   * @param a Array 1
+   * @param b Array 2
+   * @return Return an array of length a.length + b.length
+   */
+  public final static String[] interleaveArrays(String[] a, String[] b) {
+    String[] result = new String[a.length + b.length];
+
+    for (int i = 0, j = 0; i < java.lang.Math.max(a.length, b.length); i++) {
+      if (i < a.length) {
+        result[j] = a[i];
+        j++;
+      }
+
+      if (i < b.length) {
+        result[j] = b[i];
+        j++;
+      }
+    }
+
+    return result;
+  }
+
 }

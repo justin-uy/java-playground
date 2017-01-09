@@ -1,4 +1,4 @@
-import com.justinuy.playground.math.IntMathTest;
+import com.justinuy.playground.util.MathTest;
 import com.justinuy.playground.util.ArraysTest;;
 import com.justinuy.playground.testing.Test;
 import com.justinuy.playground.testing.TestClass;
@@ -16,7 +16,7 @@ public class TestRunner {
 
   // Array of test classes to test
   private static TestClass[] testClasses = new TestClass[] {
-    new IntMathTest(),
+    new MathTest(),
     new ArraysTest(),
   };
 
