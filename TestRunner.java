@@ -1,11 +1,8 @@
-import com.justinuy.playground.util.MathTest;
-import com.justinuy.playground.util.ArraysTest;;
 import com.justinuy.playground.testing.Test;
 import com.justinuy.playground.testing.TestClass;
 import java.util.ArrayList;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ExecutorService;
-import java.lang.Thread;
 
 /**
  * @author Justin Uy
@@ -14,16 +11,27 @@ import java.lang.Thread;
  */
 public class TestRunner {
 
-  // Array of test classes to test
-  private static TestClass[] testClasses = new TestClass[] {
-    new MathTest(),
-    new ArraysTest(),
-  };
+  private static class TestRunnerConfig {
+    public boolean silent;
+    public ArrayList<String> testClassNames;
+
+    public TestRunnerConfig(String[] args) {
+      testClassNames = new ArrayList<>(args.length);
+      for (String s : args) {
+        if (s == "-s") {
+          silent = true;
+        } else {
+          testClassNames.add(s);
+        }
+      }
+    }
+  }
 
   // if you pass the flag -s (silent), nothing will be written to stdout
+  // class names should be passed (as a string) with theif fully qualified name
   public static void main(String[] args) {
-    boolean success =
-      TestRunner.runTests(args.length > 0 ? args[0].equals("-s") : false);
+    TestRunnerConfig config = new TestRunnerConfig(args);
+    boolean success = TestRunner.runTests(config.silent, config.testClassNames);
 
     if (success) {
       System.exit(0);
@@ -34,8 +42,8 @@ public class TestRunner {
 
   // Runs all the test from the various test classes in parallel
   // Up to 8 concurrent threads
-  private static boolean runTests(boolean silent) {
-    ArrayList<Test> tests = getTests();
+  private static boolean runTests(boolean silent, ArrayList<String> testClassNames) {
+    ArrayList<Test> tests = getTests(silent, testClassNames);
     int totalTests = tests.size();
 
     ExecutorService executor =
@@ -83,9 +91,24 @@ public class TestRunner {
     }
   }
 
-  private static ArrayList<Test> getTests() {
+  private static ArrayList<Test> getTests(boolean silent, ArrayList<String> testClassNames) {
+    ArrayList<TestClass> testClasses = new ArrayList<TestClass>();
+    for (String testClassName : testClassNames) {
+      try {
+        Object possibleTestClass = Class.forName(testClassName).getConstructor().newInstance();
+        if (possibleTestClass instanceof TestClass) {
+          testClasses.add((TestClass)possibleTestClass);
+        } else {
+          throw new RuntimeException("Not a test class");
+        }
+      } catch (Exception e) { // Catch everything and try to run tests that are possible
+        printfIf("Warning: Could not find class or is not a test class: %s\n", testClassName);
+      }
+    }
+
     ArrayList<Test> tests = new ArrayList<>();
-    for (TestClass testClass : TestRunner.testClasses) {
+
+    for (TestClass testClass : testClasses) {
       for (Test test : testClass.getTests()) {
         tests.add(test);
       }
