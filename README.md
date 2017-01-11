@@ -15,7 +15,7 @@ The latter is partly bred from the fact that I wanted to understand how Java act
 works without the help of an IDE.
 
 ```
-# Current build/test process
-cd bin/
-find ../ -name '*.java' | xargs javac -d ./ && find ./ -regextype posix-extended -regex '.++[A-Za-z]+Test.class' | perl -pe 's/(\.\/|\.class)//g' | perl -pe 's/\//\./g' | xargs java TestRunner
+# Current build/test process (This will command will automatically find any Test classes in the binary
+# binary directory and run its tests)
+cd bin/ && find ../ -name '*.java' | xargs javac -d ./ && find ./ -regextype posix-extended -regex '.++[A-Za-z]+Test.class' | perl -pe 's/(\.\/|\.class)//g' | perl -pe 's/\//\./g' | xargs java TestRunner && cd ../
 ```

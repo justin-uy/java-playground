@@ -3,6 +3,7 @@ import com.justinuy.playground.testing.TestClass;
 import java.util.ArrayList;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ExecutorService;
+import java.lang.reflect.Field;
 
 /**
  * @author Justin Uy
@@ -31,7 +32,18 @@ public class TestRunner {
   // class names should be passed (as a string) with theif fully qualified name
   public static void main(String[] args) {
     TestRunnerConfig config = new TestRunnerConfig(args);
-    boolean success = TestRunner.runTests(config.silent, config.testClassNames);
+
+    boolean success = false;
+    try {
+      success = TestRunner.runTests(config.silent, config.testClassNames);
+    } catch (Exception e) {
+      // success is already initialized to false so we don't need to set it in here
+      printfIf(
+        !config.silent,
+        "An exception was thrown trying to get tests from Test classes: %s\n",
+        Test.getStackTraceString(e)
+      );
+    }
 
     if (success) {
       System.exit(0);
@@ -42,7 +54,7 @@ public class TestRunner {
 
   // Runs all the test from the various test classes in parallel
   // Up to 8 concurrent threads
-  private static boolean runTests(boolean silent, ArrayList<String> testClassNames) {
+  private static boolean runTests(boolean silent, ArrayList<String> testClassNames) throws Exception {
     ArrayList<Test> tests = getTests(silent, testClassNames);
     int totalTests = tests.size();
 
@@ -91,26 +103,25 @@ public class TestRunner {
     }
   }
 
-  private static ArrayList<Test> getTests(boolean silent, ArrayList<String> testClassNames) {
-    ArrayList<TestClass> testClasses = new ArrayList<TestClass>();
-    for (String testClassName : testClassNames) {
-      try {
-        Object possibleTestClass = Class.forName(testClassName).getConstructor().newInstance();
-        if (possibleTestClass instanceof TestClass) {
-          testClasses.add((TestClass)possibleTestClass);
-        } else {
-          throw new RuntimeException("Not a test class");
-        }
-      } catch (Exception e) { // Catch everything and try to run tests that are possible
-        printfIf("Warning: Could not find class or is not a test class: %s\n", testClassName);
-      }
-    }
-
+  private static ArrayList<Test> getTests(boolean silent, ArrayList<String> testClassNames) throws Exception {
     ArrayList<Test> tests = new ArrayList<>();
 
-    for (TestClass testClass : testClasses) {
-      for (Test test : testClass.getTests()) {
-        tests.add(test);
+    for (String testClassName : testClassNames) {
+      // If any of the reflection fails, all TestRunner should fail
+      Field testField = Class.forName(testClassName).getField("tests");
+
+      if (testField.getType().isArray()) {
+        Class<?> fieldElement = testField.getType().getComponentType();
+
+        if (fieldElement == Test.class) {
+          for (Test test : (Test[])testField.get(null)) {
+            tests.add(test);
+          }
+        } else {
+          throw new RuntimeException("Tests field should be of type Tests[]");
+        }
+      } else {
+        throw new RuntimeException("Tests field should be of type Tests[]");
       }
     }
 

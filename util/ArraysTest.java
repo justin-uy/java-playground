@@ -1,12 +1,12 @@
 package com.justinuy.playground.util;
 
 import com.justinuy.playground.testing.Test;
-import com.justinuy.playground.testing.TestClass;
 import com.justinuy.playground.util.Arrays;
 import java.util.ArrayList;
 
-public final class ArraysTest extends TestClass {
-  private static Test[] tests = new Test[] {
+public final class ArraysTest {
+
+  public static final Test[] tests = new Test[] {
     new Test("Binary Search", new Runnable[] {
       () -> {
         Integer[] sortedNums = Arrays.toIntegerArray(new int[] {});
@@ -102,8 +102,4 @@ public final class ArraysTest extends TestClass {
       }
     }),
   };
-
-  public ArraysTest() {
-    super(ArraysTest.tests);
-  }
 }

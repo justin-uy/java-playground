@@ -55,18 +55,22 @@ public final class Test extends AbstractTask {
     );
   }
 
+  public static final String getStackTraceString(Exception e) {
+    StringWriter sw = new StringWriter();
+    e.printStackTrace(new PrintWriter(sw));
+    return sw.toString();
+  }
+
   @Override
   public final void onFail(RuntimeException e) {
     if (silent) {
       return;
     }
-    StringWriter sw = new StringWriter();
-    e.printStackTrace(new PrintWriter(sw));
     System.out.printf(
       "Test %d: %s - Fail\n%s\n",
       this.id,
       this.name,
-      sw.toString()
+      getStackTraceString(e)
     );
   }
 

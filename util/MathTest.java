@@ -1,13 +1,12 @@
 package com.justinuy.playground.util;
 
 import com.justinuy.playground.testing.Test;
-import com.justinuy.playground.testing.TestClass;
 import com.justinuy.playground.util.Arrays;
 import java.util.ArrayList;
 
-public final class MathTest extends TestClass {
+public final class MathTest {
 
-  protected static Test[] tests = {
+  public static final Test[] tests = {
     new Test("Array Sum (uses for loop)", new Runnable[] {
       () -> {
         int[] nums = {};
@@ -145,8 +144,4 @@ public final class MathTest extends TestClass {
       }
     }),
   };
-
-  public MathTest() {
-    super(MathTest.tests);
-  }
 }
